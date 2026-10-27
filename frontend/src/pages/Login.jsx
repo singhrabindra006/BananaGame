@@ -11,6 +11,7 @@ function Login() {
   // EVENT: form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    //virtual identity because it first chechk the success
     const success = await loginUser(username, password);
     if (success) navigate("/quiz");
   };
@@ -18,6 +19,7 @@ function Login() {
   return (
     <div className="auth-page">
       <h2>Login</h2>
+
       <form onSubmit={handleSubmit}>
         <input
           value={username}
@@ -28,6 +30,7 @@ function Login() {
         <input
           type="password"
           value={password}
+          //Event-Driven Programming
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
           required

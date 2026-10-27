@@ -22,7 +22,7 @@ function Register() {
       setLocalError("Password must be at least 6 characters.");
       return;
     }
-
+    //virtual identity because it first chechk the success
     const success = await registerUser(username, password);
     if (success) navigate("/login");
   };

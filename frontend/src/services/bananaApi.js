@@ -4,24 +4,21 @@ import { logEvent } from "../utils/logger";
 /**
  * ============================================================
  * INTEROPERABILITY: External Banana API
- * ============================================================
- * Connects our React frontend to a third-party PHP-based API
- * (https://marcconrad.com/uob/banana/doc.php).
- * Protocol: HTTP GET | Data format: JSON
- * ============================================================
+ * * Connects our React frontend to a third-party PHP-based API
+ * -===========================================================
  */
 const BANANA_URL = "https://marcconrad.com/uob/banana/api.php";
 
-/**
- * Fetches and validates a puzzle from the Banana Game API.
- * The API normally returns a single object, but array responses
- * are accepted for compatibility with existing deployments.
- */
 export const fetchQuestion = async (signal) => {
   try {
     logEvent("BANANA_API_REQUEST_STARTED", { url: BANANA_URL });
+    //api requested
     const response = await axios.get(BANANA_URL, { signal });
-    const data = Array.isArray(response.data) ? response.data[0] : response.data;
+    //json processing for intrperbality
+    const data = Array.isArray(response.data)
+      ? response.data[0]
+      : response.data;
+    //api validation
     const solution = Number(data?.solution);
     if (
       typeof data?.question !== "string" ||
@@ -54,7 +51,9 @@ export const fetchQuestionWithOperator = async (operator = "+") => {
     const url = `${BANANA_URL}?operator=${encodeURIComponent(operator)}`;
     logEvent("BANANA_API_REQUEST_STARTED", { url });
     const response = await axios.get(url);
-    const data = Array.isArray(response.data) ? response.data[0] : response.data;
+    const data = Array.isArray(response.data)
+      ? response.data[0]
+      : response.data;
     const solution = Number(data?.solution);
     if (
       typeof data?.question !== "string" ||

@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }) => {
     setError("");
     try {
       const { token } = await api.login(username, password);
+      //Session management
       Cookies.set("token", token, { expires: 1, sameSite: "strict" });
       Cookies.set("username", username, { expires: 1, sameSite: "strict" });
       setUser({ username, token });

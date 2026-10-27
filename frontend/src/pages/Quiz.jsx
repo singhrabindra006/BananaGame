@@ -35,12 +35,14 @@ function Quiz() {
         if (controller.signal.aborted) return;
         logEvent("QUESTION_LOAD_FAILED", { message: requestError.message });
         setLoading(false);
-        setError("Couldn't load a banana puzzle. Check your connection and try again.");
+        setError(
+          "Couldn't load a banana puzzle. Check your connection and try again.",
+        );
       });
 
     return () => controller.abort();
   }, [questionNumber, retryCount, finished]);
-
+  //Event-Driven Programming
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!question || submitted || answer === "") return;
@@ -104,7 +106,7 @@ function Quiz() {
 
   return (
     <section className="quiz-page">
-      <h1>🍌 Banana Puzzle Quiz</h1>
+      <h1> Banana Puzzle Quiz</h1>
       <p className="quiz-welcome">Welcome, {user?.username}!</p>
 
       {finished ? (
@@ -115,6 +117,7 @@ function Quiz() {
           </p>
           {saving && <p>Saving your score...</p>}
           {saveError && <p className="error">{saveError}</p>}
+
           <button type="button" onClick={handleRestart}>
             Play again
           </button>
