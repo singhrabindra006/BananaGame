@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -6,57 +6,185 @@ function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [localError, setLocalError] = useState("");
-  const { registerUser, error } = useAuth();
+
+  const { registerUser, error, clearError } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  const isPasswordMatch = confirmPassword.length > 0 && password === confirmPassword;
+  const isPasswordLongEnough = password.length >= 6;
+  const isUsernameValid = username.trim().length >= 3;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLocalError("");
 
+    const cleanUsername = username.trim();
+    if (cleanUsername.length < 3) {
+      setLocalError("Username must be at least 3 characters long.");
+      return;
+    }
+
+    if (cleanUsername.length > 20) {
+      setLocalError("Username cannot exceed 20 characters.");
+      return;
+    }
+
+    if (!isPasswordLongEnough) {
+      setLocalError("Password must be at least 6 characters long.");
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setLocalError("Passwords do not match.");
+      setLocalError("Passwords do not match. Please recheck.");
       return;
     }
-    if (password.length < 6) {
-      setLocalError("Password must be at least 6 characters.");
-      return;
+
+    setSubmitting(true);
+    const result = await registerUser(cleanUsername, password);
+    setSubmitting(false);
+
+    if (result.success) {
+      navigate("/login", {
+        state: {
+          registeredMsg: "Account created successfully! You can now log in.",
+        },
+      });
     }
-    //virtual identity because it first chechk the success
-    const success = await registerUser(username, password);
-    if (success) navigate("/login");
   };
 
   return (
-    <div className="auth-page">
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Username"
-          required
-        />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Password"
-          required
-        />
-        <input
-          type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Confirm Password"
-          required
-        />
-        <button type="submit">Register</button>
-      </form>
-      {(localError || error) && <p className="error">{localError || error}</p>}
-      <p>
-        Have an account? <Link to="/login">Login</Link>
-      </p>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <div className="auth-brand-badge">
+            <span className="auth-banana-emoji">🍌</span>
+          </div>
+          <h2>Create Your Identity</h2>
+          <p className="auth-subtitle">Join BananaQuiz to climb the global leaderboard</p>
+        </div>
+
+        {(localError || error) && (
+          <div className="alert-box alert-error" role="alert">
+            <span className="alert-icon">⚠️</span>
+            <span>{localError || error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          <div className="form-group">
+            <label htmlFor="reg-username">
+              Username <span className="label-hint">(min 3 chars)</span>
+            </label>
+            <div className="input-with-icon">
+              <span className="input-icon">👤</span>
+              <input
+                id="reg-username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Choose a player username"
+                autoComplete="username"
+                required
+                disabled={submitting}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="reg-password">
+              Password <span className="label-hint">(min 6 chars)</span>
+            </label>
+            <div className="input-with-icon">
+              <span className="input-icon">🔒</span>
+              <input
+                id="reg-password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Create a strong password"
+                autoComplete="new-password"
+                required
+                disabled={submitting}
+              />
+              <button
+                type="button"
+                className="toggle-password-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex="-1"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "👁️" : "🙈"}
+              </button>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="reg-confirm-password">Confirm Password</label>
+            <div className="input-with-icon">
+              <span className="input-icon">🛡️</span>
+              <input
+                id="reg-confirm-password"
+                type={showPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repeat password"
+                autoComplete="new-password"
+                required
+                disabled={submitting}
+              />
+              {confirmPassword.length > 0 && (
+                <span className="validation-pill" title={isPasswordMatch ? "Passwords match" : "Mismatch"}>
+                  {isPasswordMatch ? "✅" : "❌"}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Password requirement hints */}
+          <div className="password-hints">
+            <div className={`hint-item ${isUsernameValid ? "valid" : ""}`}>
+              <span>{isUsernameValid ? "✓" : "•"}</span> Username 3–20 chars
+            </div>
+            <div className={`hint-item ${isPasswordLongEnough ? "valid" : ""}`}>
+              <span>{isPasswordLongEnough ? "✓" : "•"}</span> At least 6 characters
+            </div>
+            <div className={`hint-item ${isPasswordMatch ? "valid" : ""}`}>
+              <span>{isPasswordMatch ? "✓" : "•"}</span> Passwords match
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            className="btn-auth-primary"
+            disabled={submitting || !isUsernameValid || !isPasswordLongEnough || !isPasswordMatch}
+          >
+            {submitting ? (
+              <span className="btn-content-loading">
+                <span className="button-spinner"></span>
+                <span>Creating Account...</span>
+              </span>
+            ) : (
+              <span>Register & Start Playing 🍌</span>
+            )}
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          <p>
+            Already have an account?{" "}
+            <Link to="/login" className="auth-switch-link">
+              Sign In
+            </Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
