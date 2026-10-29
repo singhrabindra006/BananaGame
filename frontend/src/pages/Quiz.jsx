@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { saveScore } from "../services/api";
 import { fetchQuestion } from "../services/bananaApi";
 import { logEvent } from "../utils/logger";
+import { playClick, playCorrect, playIncorrect, playFanfare } from "../utils/sound";
 
 const TOTAL_QUESTIONS = 10;
 const DIGIT_KEYS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -47,7 +48,7 @@ function Quiz() {
     return () => controller.abort();
   }, [questionNumber, retryCount, finished]);
 
-  // Event-Driven Programming: Answer verification
+  // Event-Driven Programming: Answer verification with audio feedback
   const handleSubmit = (event) => {
     if (event) event.preventDefault();
     if (!question || submitted || answer === "") return;
@@ -57,8 +58,10 @@ function Quiz() {
     if (correct) {
       setScore((currentScore) => currentScore + 1);
       setFeedback("🎉 Brilliant! That is the correct answer!");
+      playCorrect();
     } else {
       setFeedback(`🍌 Not quite! The correct solution was ${question.solution}.`);
+      playIncorrect();
     }
 
     setSubmitted(true);
@@ -87,6 +90,9 @@ function Quiz() {
     setFinished(true);
     setSaving(true);
     setSaveError("");
+    if (score >= 7) {
+      playFanfare();
+    }
     logEvent("QUIZ_COMPLETED", { finalScore: score, total: TOTAL_QUESTIONS });
 
     try {
@@ -124,6 +130,7 @@ function Quiz() {
 
   const handleDigitSelect = (digit) => {
     if (submitted) return;
+    playClick();
     setAnswer(String(digit));
   };
 
@@ -132,6 +139,7 @@ function Quiz() {
     const handleKeyDown = (e) => {
       if (finished || loading || submitted) return;
       if (e.key >= "0" && e.key <= "9") {
+        playClick();
         setAnswer(e.key);
       }
     };

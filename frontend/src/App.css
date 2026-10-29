@@ -2146,3 +2146,41 @@ html, body {
     font-size: 0.82rem;
   }
 }
+
+
+/* Sound Controls */
+.btn-sound-toggle-desktop,
+.btn-sound-toggle-mobile {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.65rem;
+  font-size: 1rem;
+  color: #ffffff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-sound-toggle-desktop:hover,
+.btn-sound-toggle-mobile:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.nav-actions-mobile {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .nav-actions-mobile {
+    display: flex;
+  }
+  .btn-sound-toggle-desktop {
+    display: none;
+  }
+}

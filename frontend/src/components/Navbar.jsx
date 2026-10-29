@@ -1,12 +1,21 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { isSoundEnabled, setSoundEnabled, playClick } from "../utils/sound";
 
 function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
+
+  const handleToggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    setSoundEnabled(next);
+    if (next) playClick();
+  };
 
   const handleLogout = () => {
     setMobileMenuOpen(false);
@@ -28,17 +37,28 @@ function Navbar() {
           <span className="brand-text">Banana<span className="brand-accent">Quiz</span></span>
         </Link>
 
-        {/* Mobile Hamburger Button */}
-        <button
-          className={`hamburger-btn ${mobileMenuOpen ? "active" : ""}`}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle navigation menu"
-          aria-expanded={mobileMenuOpen}
-        >
-          <span className="hamburger-bar"></span>
-          <span className="hamburger-bar"></span>
-          <span className="hamburger-bar"></span>
-        </button>
+        <div className="nav-actions-mobile">
+          <button
+            type="button"
+            className="btn-sound-toggle-mobile"
+            onClick={handleToggleSound}
+            aria-label={soundOn ? "Mute audio" : "Enable audio"}
+            title={soundOn ? "Mute audio" : "Enable audio"}
+          >
+            {soundOn ? "🔊" : "🔇"}
+          </button>
+
+          <button
+            className={`hamburger-btn ${mobileMenuOpen ? "active" : ""}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            <span className="hamburger-bar"></span>
+            <span className="hamburger-bar"></span>
+            <span className="hamburger-bar"></span>
+          </button>
+        </div>
 
         {/* Navigation links & User Actions */}
         <div className={`nav-links-container ${mobileMenuOpen ? "open" : ""}`}>
@@ -62,6 +82,14 @@ function Navbar() {
               </div>
 
               <div className="nav-user-section">
+                <button
+                  type="button"
+                  className="btn-sound-toggle-desktop"
+                  onClick={handleToggleSound}
+                  title={soundOn ? "Mute sound" : "Enable sound"}
+                >
+                  {soundOn ? "🔊" : "🔇"}
+                </button>
                 <div className="user-badge" title={`Signed in as ${user.username}`}>
                   <span className="user-avatar">
                     {user.username.charAt(0).toUpperCase()}
@@ -79,6 +107,14 @@ function Navbar() {
             </>
           ) : (
             <div className="nav-links auth-nav-links">
+              <button
+                type="button"
+                className="btn-sound-toggle-desktop"
+                onClick={handleToggleSound}
+                title={soundOn ? "Mute sound" : "Enable sound"}
+              >
+                {soundOn ? "🔊" : "🔇"}
+              </button>
               <Link
                 to="/login"
                 className={`nav-link ${isActive("/login") ? "active" : ""}`}
