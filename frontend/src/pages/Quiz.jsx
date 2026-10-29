@@ -8,6 +8,7 @@ import { playClick, playCorrect, playIncorrect, playFanfare } from "../utils/sou
 
 const TOTAL_QUESTIONS = 10;
 const DIGIT_KEYS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+const SPEED_RUN_SECONDS = 20;
 
 function Quiz() {
   const { user } = useAuth();
@@ -28,6 +29,10 @@ function Quiz() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState("");
 
+  // Speed run mode
+  const [timerEnabled, setTimerEnabled] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(SPEED_RUN_SECONDS);
+
   useEffect(() => {
     if (finished) return undefined;
 
@@ -37,6 +42,7 @@ function Quiz() {
         setQuestion(nextQuestion);
         setLoading(false);
         setError("");
+        setTimeLeft(SPEED_RUN_SECONDS);
       })
       .catch((requestError) => {
         if (controller.signal.aborted) return;
@@ -47,6 +53,25 @@ function Quiz() {
 
     return () => controller.abort();
   }, [questionNumber, retryCount, finished]);
+
+  // Speed run countdown timer
+  useEffect(() => {
+    if (!timerEnabled || loading || submitted || finished || !question) return;
+
+    if (timeLeft <= 0) {
+      setSubmitted(true);
+      setIsCorrect(false);
+      setFeedback(`⏰ Time ran out! The correct solution was ${question.solution}.`);
+      playIncorrect();
+      return;
+    }
+
+    const timerId = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [timerEnabled, timeLeft, loading, submitted, finished, question]);
 
   // Event-Driven Programming: Answer verification with audio feedback
   const handleSubmit = (event) => {
@@ -70,6 +95,8 @@ function Quiz() {
       userAnswer: Number(answer),
       solution: question.solution,
       correct,
+      speedRun: timerEnabled,
+      secondsLeft: timeLeft,
     });
   };
 
@@ -82,6 +109,7 @@ function Quiz() {
       setIsCorrect(false);
       setLoading(true);
       setImageLoaded(false);
+      setTimeLeft(SPEED_RUN_SECONDS);
       setQuestionNumber((currentNumber) => currentNumber + 1);
       return;
     }
@@ -126,6 +154,7 @@ function Quiz() {
     setFinished(false);
     setSaveSuccess(false);
     setSaveError("");
+    setTimeLeft(SPEED_RUN_SECONDS);
   };
 
   const handleDigitSelect = (digit) => {
@@ -213,12 +242,30 @@ function Quiz() {
         <div className="quiz-card">
           {/* Header & Status */}
           <div className="quiz-header">
-            <div className="quiz-badge puzzle-step-badge">
-              <span>Puzzle {questionNumber + 1} of {TOTAL_QUESTIONS}</span>
+            <div className="quiz-header-left">
+              <div className="quiz-badge puzzle-step-badge">
+                <span>Puzzle {questionNumber + 1} of {TOTAL_QUESTIONS}</span>
+              </div>
+              <button
+                type="button"
+                className={`btn-timer-toggle ${timerEnabled ? "active" : ""}`}
+                onClick={() => setTimerEnabled(!timerEnabled)}
+                title={timerEnabled ? "Disable Speed Run" : "Enable 20s Speed Run"}
+              >
+                ⏱️ Speed Run: {timerEnabled ? "ON" : "OFF"}
+              </button>
             </div>
-            <div className="quiz-badge quiz-score-badge">
-              <span className="badge-icon">⭐</span>
-              <span>Score: <strong>{score}</strong></span>
+
+            <div className="quiz-header-right">
+              {timerEnabled && !submitted && !loading && (
+                <div className={`quiz-timer-pill ${timeLeft <= 5 ? "timer-urgent" : ""}`}>
+                  <span>⏱️ {timeLeft}s</span>
+                </div>
+              )}
+              <div className="quiz-badge quiz-score-badge">
+                <span className="badge-icon">⭐</span>
+                <span>Score: <strong>{score}</strong></span>
+              </div>
             </div>
           </div>
 

@@ -2184,3 +2184,61 @@ html, body {
     display: none;
   }
 }
+
+
+/* Speed Run Controls */
+.quiz-header-left,
+.quiz-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-timer-toggle {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-full);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-timer-toggle:hover {
+  background: #e2e8f0;
+  color: var(--text-main);
+}
+
+.btn-timer-toggle.active {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+}
+
+.quiz-timer-pill {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  color: #b91c1c;
+  padding: 0.35rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  animation: pulse 1s infinite alternate;
+}
+
+.quiz-timer-pill.timer-urgent {
+  background: #fee2e2;
+  border-color: #ef4444;
+  color: #991b1b;
+  animation: bounce 500ms infinite alternate ease-in-out;
+}
+
+@keyframes pulse {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
