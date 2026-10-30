@@ -18,6 +18,8 @@ function Quiz() {
   const [question, setQuestion] = useState(null);
   const [answer, setAnswer] = useState("");
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [maxStreak, setMaxStreak] = useState(0);
   const [feedback, setFeedback] = useState("");
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -61,6 +63,7 @@ function Quiz() {
     if (timeLeft <= 0) {
       setSubmitted(true);
       setIsCorrect(false);
+      setStreak(0);
       setFeedback(`⏰ Time ran out! The correct solution was ${question.solution}.`);
       playIncorrect();
       return;
@@ -73,7 +76,7 @@ function Quiz() {
     return () => clearInterval(timerId);
   }, [timerEnabled, timeLeft, loading, submitted, finished, question]);
 
-  // Event-Driven Programming: Answer verification with audio feedback
+  // Event-Driven Programming: Answer verification with audio feedback & streaks
   const handleSubmit = (event) => {
     if (event) event.preventDefault();
     if (!question || submitted || answer === "") return;
@@ -82,9 +85,16 @@ function Quiz() {
     setIsCorrect(correct);
     if (correct) {
       setScore((currentScore) => currentScore + 1);
-      setFeedback("🎉 Brilliant! That is the correct answer!");
+      setStreak((prev) => {
+        const next = prev + 1;
+        setMaxStreak((max) => Math.max(max, next));
+        const streakBonus = next >= 3 ? ` 🔥 ${next}x Combo Streak!` : "";
+        setFeedback(`🎉 Brilliant! That is the correct answer!${streakBonus}`);
+        return next;
+      });
       playCorrect();
     } else {
+      setStreak(0);
       setFeedback(`🍌 Not quite! The correct solution was ${question.solution}.`);
       playIncorrect();
     }
@@ -97,6 +107,7 @@ function Quiz() {
       correct,
       speedRun: timerEnabled,
       secondsLeft: timeLeft,
+      streak: correct ? streak + 1 : 0,
     });
   };
 
@@ -121,7 +132,7 @@ function Quiz() {
     if (score >= 7) {
       playFanfare();
     }
-    logEvent("QUIZ_COMPLETED", { finalScore: score, total: TOTAL_QUESTIONS });
+    logEvent("QUIZ_COMPLETED", { finalScore: score, total: TOTAL_QUESTIONS, maxStreak });
 
     try {
       await saveScore(user?.username, score);
@@ -145,6 +156,8 @@ function Quiz() {
     setQuestion(null);
     setAnswer("");
     setScore(0);
+    setStreak(0);
+    setMaxStreak(0);
     setFeedback("");
     setLoading(true);
     setImageLoaded(false);
@@ -194,7 +207,7 @@ function Quiz() {
           <h2>{getRating().title}</h2>
           <p className="results-subtitle">{getRating().subtitle}</p>
 
-          <div className="results-stats-grid">
+          <div className="results-stats-grid stats-grid-four">
             <div className="stat-box">
               <span className="stat-label">Correct</span>
               <span className="stat-value text-accent">{score}</span>
@@ -208,6 +221,10 @@ function Quiz() {
               <span className="stat-value text-success">
                 {Math.round((score / TOTAL_QUESTIONS) * 100)}%
               </span>
+            </div>
+            <div className="stat-box">
+              <span className="stat-label">Max Streak</span>
+              <span className="stat-value text-accent">🔥 {maxStreak}</span>
             </div>
           </div>
 
@@ -257,6 +274,11 @@ function Quiz() {
             </div>
 
             <div className="quiz-header-right">
+              {streak >= 2 && (
+                <div className="quiz-streak-pill" title={`${streak} in a row!`}>
+                  <span>🔥 {streak}x Streak</span>
+                </div>
+              )}
               {timerEnabled && !submitted && !loading && (
                 <div className={`quiz-timer-pill ${timeLeft <= 5 ? "timer-urgent" : ""}`}>
                   <span>⏱️ {timeLeft}s</span>

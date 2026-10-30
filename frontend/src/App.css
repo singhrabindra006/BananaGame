@@ -2242,3 +2242,29 @@ html, body {
   from { opacity: 0.85; }
   to { opacity: 1; }
 }
+
+
+/* Streak Counter */
+.quiz-streak-pill {
+  background: linear-gradient(135deg, #ffedd5, #fed7aa);
+  border: 1.5px solid #fb923c;
+  color: #c2410c;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 6px rgba(251, 146, 60, 0.25);
+  animation: bounce 600ms infinite alternate ease-in-out;
+}
+
+.stats-grid-four {
+  grid-template-columns: repeat(4, 1fr) !important;
+}
+
+@media (max-width: 600px) {
+  .stats-grid-four {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
