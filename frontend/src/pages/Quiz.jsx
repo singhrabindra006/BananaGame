@@ -5,6 +5,7 @@ import { saveScore } from "../services/api";
 import { fetchQuestion } from "../services/bananaApi";
 import { logEvent } from "../utils/logger";
 import { playClick, playCorrect, playIncorrect, playFanfare } from "../utils/sound";
+import Confetti from "../components/Confetti.jsx";
 
 const TOTAL_QUESTIONS = 10;
 const DIGIT_KEYS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -199,6 +200,8 @@ function Quiz() {
 
   return (
     <section className="quiz-container">
+      {finished && score >= 7 && <Confetti />}
+
       {finished ? (
         <div className="quiz-card quiz-results-card" aria-live="polite">
           <div className="results-trophy-badge">
