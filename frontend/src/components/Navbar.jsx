@@ -79,6 +79,13 @@ function Navbar() {
                 >
                   <span className="nav-icon">🏆</span> Leaderboard
                 </Link>
+                <Link
+                  to="/profile"
+                  className={`nav-link ${isActive("/profile") ? "active" : ""}`}
+                  onClick={closeMenu}
+                >
+                  <span className="nav-icon">👤</span> Profile
+                </Link>
               </div>
 
               <div className="nav-user-section">
@@ -90,12 +97,12 @@ function Navbar() {
                 >
                   {soundOn ? "🔊" : "🔇"}
                 </button>
-                <div className="user-badge" title={`Signed in as ${user.username}`}>
+                <Link to="/profile" className="user-badge" title="View your profile" onClick={closeMenu}>
                   <span className="user-avatar">
                     {user.username.charAt(0).toUpperCase()}
                   </span>
                   <span className="user-name">{user.username}</span>
-                </div>
+                </Link>
                 <button
                   className="btn-logout"
                   onClick={handleLogout}

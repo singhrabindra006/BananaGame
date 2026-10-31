@@ -6,6 +6,7 @@ import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
 import Quiz from "./pages/Quiz.jsx";
 import Scoreboard from "./pages/Scoreboard.jsx";
+import Profile from "./pages/Profile.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import "./App.css";
 
@@ -59,6 +60,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Scoreboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />
