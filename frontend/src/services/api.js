@@ -37,6 +37,12 @@ export const register = (username, password) =>
 export const getMe = () =>
   API.get("/auth/me").then((res) => res.data);
 
+export const changePassword = (currentPassword, newPassword) =>
+  API.put("/auth/password", { currentPassword, newPassword }).then((res) => res.data);
+
+export const updateAvatar = (avatar) =>
+  API.put("/auth/avatar", { avatar }).then((res) => res.data);
+
 export const logoutApi = () =>
   API.post("/auth/logout").then((res) => res.data).catch(() => null);
 

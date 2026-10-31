@@ -124,6 +124,7 @@ router.post("/login", async (req, res) => {
       token,
       user: {
         username: user.username,
+        avatar: user.avatar || "🍌",
       },
       message: "Login successful",
     });
@@ -137,13 +138,72 @@ router.post("/login", async (req, res) => {
  */
 router.get("/me", authMiddleware, async (req, res) => {
   try {
+    const userDoc = await User.findOne({ username: req.user.username });
     const scoreRecord = await Score.findOne({ username: req.user.username });
+
     res.json({
       username: req.user.username,
+      avatar: userDoc?.avatar || "🍌",
+      createdAt: userDoc?.createdAt || new Date(),
       highScore: scoreRecord ? scoreRecord.score : 0,
+      gamesPlayed: scoreRecord ? scoreRecord.gamesPlayed : 0,
+      totalPoints: scoreRecord ? scoreRecord.totalScore : 0,
+      perfectGames: scoreRecord ? scoreRecord.perfectGames : 0,
     });
   } catch (err) {
     res.status(500).json({ message: "Server error: " + err.message });
+  }
+});
+
+/**
+ * CHANGE PASSWORD - Secure password change for authenticated user
+ */
+router.put("/password", authMiddleware, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ message: "Current and new password are required" });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: "New password must be at least 6 characters long" });
+  }
+
+  try {
+    const user = await User.findOne({ username: req.user.username });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect current password" });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Error changing password: " + err.message });
+  }
+});
+
+/**
+ * CHANGE AVATAR - Updates user's display avatar emoji
+ */
+router.put("/avatar", authMiddleware, async (req, res) => {
+  const { avatar } = req.body;
+
+  if (!avatar || typeof avatar !== "string") {
+    return res.status(400).json({ message: "Avatar is required" });
+  }
+
+  try {
+    await User.updateOne({ username: req.user.username }, { $set: { avatar } });
+    res.json({ message: "Avatar updated successfully", avatar });
+  } catch (err) {
+    res.status(500).json({ message: "Error updating avatar: " + err.message });
   }
 });
 
