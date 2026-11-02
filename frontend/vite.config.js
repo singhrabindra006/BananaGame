@@ -17,13 +17,13 @@ export default defineConfig({
     },
   },
   build: {
-    // Increase chunk size warning limit (default 500 kB)
     chunkSizeWarningLimit: 800,
     rollupOptions: {
       output: {
-        // Split vendor libraries into a separate chunk for better caching
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
         },
       },
     },
