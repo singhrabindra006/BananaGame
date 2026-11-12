@@ -1,34 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { getMe, changePassword, updateAvatar } from "../services/api";
+import { getMe, changePassword } from "../services/api";
 import {
+  UserIcon,
   LockIcon,
   CheckCircleIcon,
   AlertCircleIcon,
   TargetIcon,
   TrophyIcon,
   StarIcon,
+  ShieldIcon,
+  CrownIcon,
 } from "../components/Icons.jsx";
 
-const AVATAR_OPTIONS = [
-  { id: "⚡", label: "Velocity" },
-  { id: "💎", label: "Crystal" },
-  { id: "🎯", label: "Precision" },
-  { id: "🛡️", label: "Guardian" },
-  { id: "👑", label: "Crown" },
-  { id: "🧠", label: "Cognition" },
-  { id: "🚀", label: "Orbit" },
-  { id: "⭐", label: "Prime" },
-  { id: "🏆", label: "Apex" },
-  { id: "🔬", label: "Logic" },
-];
+const getTier = (score) => {
+  if (score >= 10) return { label: "Grand Master", badgeClass: "tier-grandmaster" };
+  if (score >= 8) return { label: "Advanced", badgeClass: "tier-master" };
+  if (score >= 5) return { label: "Intermediate", badgeClass: "tier-adventurer" };
+  return { label: "Foundational", badgeClass: "tier-sprout" };
+};
 
 function Profile() {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedAvatar, setSelectedAvatar] = useState("⚡");
-  const [avatarMsg, setAvatarMsg] = useState("");
 
   // Change password state
   const [currentPassword, setCurrentPassword] = useState("");
@@ -44,7 +39,6 @@ function Profile() {
       .then((data) => {
         if (!ignore && data) {
           setProfile(data);
-          if (data.avatar) setSelectedAvatar(data.avatar);
         }
       })
       .catch(() => null)
@@ -56,18 +50,6 @@ function Profile() {
       ignore = true;
     };
   }, []);
-
-  const handleAvatarSelect = async (symbol) => {
-    setSelectedAvatar(symbol);
-    setAvatarMsg("");
-    try {
-      await updateAvatar(symbol);
-      setAvatarMsg("Avatar updated successfully.");
-      setTimeout(() => setAvatarMsg(""), 2500);
-    } catch {
-      setAvatarMsg("Failed to update avatar.");
-    }
-  };
 
   const handleChangePassword = async (e) => {
     e.preventDefault();
@@ -101,7 +83,7 @@ function Profile() {
     return (
       <div className="auth-loading-state">
         <div className="spinner"></div>
-        <p>Loading profile data...</p>
+        <p>Loading profile details...</p>
       </div>
     );
   }
@@ -112,61 +94,96 @@ function Profile() {
         month: "long",
         day: "numeric",
       })
-    : "Recently";
+    : "November 2026";
+
+  const userInitial = user?.username ? user.username.charAt(0).toUpperCase() : "U";
+  const userTier = getTier(profile?.highScore || 0);
 
   return (
     <div className="profile-container">
-      {/* Profile Header */}
+      {/* Profile Summary Header */}
       <div className="profile-header-card">
-        <div className="profile-avatar-large">
-          <span className="profile-avatar-symbol">{selectedAvatar}</span>
-        </div>
-        <div className="profile-info">
-          <h2>{user?.username}</h2>
-          <p className="profile-subtitle">Account Member since {joinDate}</p>
-        </div>
-      </div>
-
-      {/* Avatar Picker */}
-      <div className="profile-section-card">
-        <div className="section-header-inline">
-          <div>
-            <h3>Profile Identity Emblem</h3>
-            <p className="section-desc">Select an emblem to represent your profile on rankings</p>
+        <div className="profile-header-main">
+          <div className="profile-avatar-large">
+            <span className="profile-avatar-initial">{userInitial}</span>
+            <span className="profile-status-indicator" title="Active Account" />
           </div>
-          {avatarMsg && (
-            <span className="save-toast">
-              <CheckCircleIcon size={14} /> {avatarMsg}
-            </span>
-          )}
+
+          <div className="profile-info">
+            <div className="profile-title-row">
+              <h2>{user?.username}</h2>
+              <span className={`tier-badge ${userTier.badgeClass}`}>
+                {userTier.label}
+              </span>
+              <span className="account-verified-pill">
+                <CheckCircleIcon size={12} /> Verified
+              </span>
+            </div>
+            <p className="profile-subtitle">
+              Account Member since {joinDate} &bull; Standard Identity
+            </p>
+          </div>
         </div>
-        <div className="avatar-picker-grid">
-          {AVATAR_OPTIONS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`avatar-option-btn ${selectedAvatar === item.id ? "active" : ""}`}
-              onClick={() => handleAvatarSelect(item.id)}
-              title={item.label}
-            >
-              <span className="avatar-icon-symbol">{item.id}</span>
-              <span className="avatar-option-label">{item.label}</span>
-            </button>
-          ))}
+
+        <div className="profile-header-kpis">
+          <div className="header-kpi-item">
+            <span className="header-kpi-val">{profile?.highScore || 0}/10</span>
+            <span className="header-kpi-lbl">Top Score</span>
+          </div>
+          <div className="header-kpi-divider" />
+          <div className="header-kpi-item">
+            <span className="header-kpi-val">{profile?.gamesPlayed || 0}</span>
+            <span className="header-kpi-lbl">Sessions</span>
+          </div>
         </div>
       </div>
 
-      {/* Career Stats */}
+      {/* Account Details & Virtual Identity Meta */}
       <div className="profile-section-card">
-        <h3>Performance Overview</h3>
-        <p className="section-desc">Summary of all validated problem solving sessions</p>
+        <div className="section-title-wrap">
+          <UserIcon size={16} className="section-title-icon" />
+          <h3>Account Information</h3>
+        </div>
+        <p className="section-desc">Virtual identity parameters and authentication specifications</p>
+
+        <div className="profile-meta-grid">
+          <div className="profile-meta-item">
+            <span className="meta-label">Username Handle</span>
+            <span className="meta-value">@{user?.username}</span>
+          </div>
+
+          <div className="profile-meta-item">
+            <span className="meta-label">Identity Protocol</span>
+            <span className="meta-value">Stateless JWT Bearer Token</span>
+          </div>
+
+          <div className="profile-meta-item">
+            <span className="meta-label">Password Encryption</span>
+            <span className="meta-value">Bcrypt Salted Hash (10 Rounds)</span>
+          </div>
+
+          <div className="profile-meta-item">
+            <span className="meta-label">Client Session</span>
+            <span className="meta-value">Secure HTTP Cookie Storage</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Career Performance Overview */}
+      <div className="profile-section-card">
+        <div className="section-title-wrap">
+          <TargetIcon size={16} className="section-title-icon" />
+          <h3>Performance Analytics</h3>
+        </div>
+        <p className="section-desc">Aggregate metrics from verified mathematical problem-solving sessions</p>
+
         <div className="profile-stats-grid">
           <div className="stat-box">
-            <span className="stat-label">Best Score</span>
+            <span className="stat-label">High Score Benchmark</span>
             <span className="stat-value text-accent">{profile?.highScore || 0} / 10</span>
           </div>
           <div className="stat-box">
-            <span className="stat-label">Sessions Completed</span>
+            <span className="stat-label">Completed Sessions</span>
             <span className="stat-value">{profile?.gamesPlayed || 0}</span>
           </div>
           <div className="stat-box">
@@ -180,10 +197,13 @@ function Profile() {
         </div>
       </div>
 
-      {/* Security & Password */}
+      {/* Security & Credentials */}
       <div className="profile-section-card">
-        <h3>Security & Credentials</h3>
-        <p className="section-desc">Update your password to maintain account security</p>
+        <div className="section-title-wrap">
+          <LockIcon size={16} className="section-title-icon" />
+          <h3>Credential Security</h3>
+        </div>
+        <p className="section-desc">Manage your password to ensure secure access to your account</p>
 
         {pwMsg && (
           <div className="alert-box alert-success" role="alert">
@@ -199,7 +219,7 @@ function Profile() {
           </div>
         )}
 
-        <form onSubmit={handleChangePassword} className="auth-form">
+        <form onSubmit={handleChangePassword} className="auth-form profile-pw-form">
           <div className="form-group">
             <label htmlFor="cur-pass">Current Password</label>
             <input
@@ -207,43 +227,49 @@ function Profile() {
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Enter existing password"
+              placeholder="Enter current password"
               required
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="new-pass">New Password <span className="label-hint">(min 6 characters)</span></label>
-            <input
-              id="new-pass"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Enter new password"
-              required
-            />
+          <div className="form-row-two-col">
+            <div className="form-group">
+              <label htmlFor="new-pass">
+                New Password <span className="label-hint">(min 6 chars)</span>
+              </label>
+              <input
+                id="new-pass"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="confirm-new-pass">Confirm New Password</label>
+              <input
+                id="confirm-new-pass"
+                type="password"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                placeholder="Re-enter new password"
+                required
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="confirm-new-pass">Confirm New Password</label>
-            <input
-              id="confirm-new-pass"
-              type="password"
-              value={confirmNewPassword}
-              onChange={(e) => setConfirmNewPassword(e.target.value)}
-              placeholder="Re-enter new password"
-              required
-            />
+          <div className="profile-form-actions">
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={pwLoading || !currentPassword || !newPassword || !confirmNewPassword}
+            >
+              <LockIcon size={15} />
+              <span>{pwLoading ? "Updating Password..." : "Update Password"}</span>
+            </button>
           </div>
-
-          <button
-            type="submit"
-            className="btn-primary"
-            disabled={pwLoading || !currentPassword || !newPassword || !confirmNewPassword}
-          >
-            <LockIcon size={15} />
-            <span>{pwLoading ? "Updating Password..." : "Update Password"}</span>
-          </button>
         </form>
       </div>
     </div>

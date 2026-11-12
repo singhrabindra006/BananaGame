@@ -231,3 +231,4 @@ export const TargetIcon = ({ className = "icon", size = 18 }) => (
     <circle cx="12" cy="12" r="2" />
   </svg>
 );
+
