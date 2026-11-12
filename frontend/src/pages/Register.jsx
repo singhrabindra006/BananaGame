@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import {
+  BananaLogoIcon,
+  UserIcon,
+  LockIcon,
+  ShieldIcon,
+  EyeIcon,
+  EyeOffIcon,
+  CheckCircleIcon,
+  AlertCircleIcon,
+} from "../components/Icons.jsx";
 
 function Register() {
   const [username, setUsername] = useState("");
@@ -42,7 +52,7 @@ function Register() {
     }
 
     if (password !== confirmPassword) {
-      setLocalError("Passwords do not match. Please recheck.");
+      setLocalError("Passwords do not match. Please verify.");
       return;
     }
 
@@ -53,7 +63,7 @@ function Register() {
     if (result.success) {
       navigate("/login", {
         state: {
-          registeredMsg: "Account created successfully! You can now log in.",
+          registeredMsg: "Account registered successfully. Please sign in to proceed.",
         },
       });
     }
@@ -64,15 +74,17 @@ function Register() {
       <div className="auth-card">
         <div className="auth-header">
           <div className="auth-brand-badge">
-            <span className="auth-banana-emoji">🍌</span>
+            <BananaLogoIcon size={32} />
           </div>
-          <h2>Create Your Identity</h2>
-          <p className="auth-subtitle">Join BananaQuiz to climb the global leaderboard</p>
+          <h2>Create Account</h2>
+          <p className="auth-subtitle">
+            Join the mathematical logic platform to track performance and rankings
+          </p>
         </div>
 
         {(localError || error) && (
           <div className="alert-box alert-error" role="alert">
-            <span className="alert-icon">⚠️</span>
+            <AlertCircleIcon size={18} className="alert-icon" />
             <span>{localError || error}</span>
           </div>
         )}
@@ -80,16 +92,18 @@ function Register() {
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label htmlFor="reg-username">
-              Username <span className="label-hint">(min 3 chars)</span>
+              Username <span className="label-hint">(3–20 characters)</span>
             </label>
             <div className="input-with-icon">
-              <span className="input-icon">👤</span>
+              <span className="input-icon">
+                <UserIcon size={16} />
+              </span>
               <input
                 id="reg-username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="Choose a player username"
+                placeholder="Choose a username"
                 autoComplete="username"
                 required
                 disabled={submitting}
@@ -99,16 +113,18 @@ function Register() {
 
           <div className="form-group">
             <label htmlFor="reg-password">
-              Password <span className="label-hint">(min 6 chars)</span>
+              Password <span className="label-hint">(min 6 characters)</span>
             </label>
             <div className="input-with-icon">
-              <span className="input-icon">🔒</span>
+              <span className="input-icon">
+                <LockIcon size={16} />
+              </span>
               <input
                 id="reg-password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Create a strong password"
+                placeholder="Create a secure password"
                 autoComplete="new-password"
                 required
                 disabled={submitting}
@@ -120,7 +136,7 @@ function Register() {
                 tabIndex="-1"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? "👁️" : "🙈"}
+                {showPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
               </button>
             </div>
           </div>
@@ -128,20 +144,29 @@ function Register() {
           <div className="form-group">
             <label htmlFor="reg-confirm-password">Confirm Password</label>
             <div className="input-with-icon">
-              <span className="input-icon">🛡️</span>
+              <span className="input-icon">
+                <ShieldIcon size={16} />
+              </span>
               <input
                 id="reg-confirm-password"
                 type={showPassword ? "text" : "password"}
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Repeat password"
+                placeholder="Confirm password"
                 autoComplete="new-password"
                 required
                 disabled={submitting}
               />
               {confirmPassword.length > 0 && (
-                <span className="validation-pill" title={isPasswordMatch ? "Passwords match" : "Mismatch"}>
-                  {isPasswordMatch ? "✅" : "❌"}
+                <span
+                  className={`validation-status ${isPasswordMatch ? "valid" : "invalid"}`}
+                  title={isPasswordMatch ? "Passwords match" : "Mismatch"}
+                >
+                  {isPasswordMatch ? (
+                    <CheckCircleIcon size={16} />
+                  ) : (
+                    <AlertCircleIcon size={16} />
+                  )}
                 </span>
               )}
             </div>
@@ -150,13 +175,13 @@ function Register() {
           {/* Password requirement hints */}
           <div className="password-hints">
             <div className={`hint-item ${isUsernameValid ? "valid" : ""}`}>
-              <span>{isUsernameValid ? "✓" : "•"}</span> Username 3–20 chars
+              <span className="hint-bullet">{isUsernameValid ? "✓" : "•"}</span> Username 3–20 chars
             </div>
             <div className={`hint-item ${isPasswordLongEnough ? "valid" : ""}`}>
-              <span>{isPasswordLongEnough ? "✓" : "•"}</span> At least 6 characters
+              <span className="hint-bullet">{isPasswordLongEnough ? "✓" : "•"}</span> Min 6 characters
             </div>
             <div className={`hint-item ${isPasswordMatch ? "valid" : ""}`}>
-              <span>{isPasswordMatch ? "✓" : "•"}</span> Passwords match
+              <span className="hint-bullet">{isPasswordMatch ? "✓" : "•"}</span> Passwords match
             </div>
           </div>
 
@@ -171,7 +196,7 @@ function Register() {
                 <span>Creating Account...</span>
               </span>
             ) : (
-              <span>Register & Start Playing 🍌</span>
+              <span>Register Account</span>
             )}
           </button>
         </form>

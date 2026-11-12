@@ -6,6 +6,16 @@ import { fetchQuestion } from "../services/bananaApi";
 import { logEvent } from "../utils/logger";
 import { playClick, playCorrect, playIncorrect, playFanfare } from "../utils/sound";
 import Confetti from "../components/Confetti.jsx";
+import {
+  TrophyIcon,
+  TimerIcon,
+  FlameIcon,
+  RotateCcwIcon,
+  ArrowRightIcon,
+  AlertCircleIcon,
+  CheckCircleIcon,
+  TargetIcon,
+} from "../components/Icons.jsx";
 
 const TOTAL_QUESTIONS = 10;
 const DIGIT_KEYS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -51,7 +61,7 @@ function Quiz() {
         if (controller.signal.aborted) return;
         logEvent("QUESTION_LOAD_FAILED", { message: requestError.message });
         setLoading(false);
-        setError("Couldn't load banana puzzle. Please check your internet connection and try again.");
+        setError("Unable to load puzzle. Please check your connection and retry.");
       });
 
     return () => controller.abort();
@@ -65,7 +75,7 @@ function Quiz() {
       setSubmitted(true);
       setIsCorrect(false);
       setStreak(0);
-      setFeedback(`⏰ Time ran out! The correct solution was ${question.solution}.`);
+      setFeedback(`Time expired. The correct solution was ${question.solution}.`);
       playIncorrect();
       return;
     }
@@ -89,14 +99,14 @@ function Quiz() {
       setStreak((prev) => {
         const next = prev + 1;
         setMaxStreak((max) => Math.max(max, next));
-        const streakBonus = next >= 3 ? ` 🔥 ${next}x Combo Streak!` : "";
-        setFeedback(`🎉 Brilliant! That is the correct answer!${streakBonus}`);
+        const streakBonus = next >= 3 ? ` (${next} in a row)` : "";
+        setFeedback(`Correct solution verified${streakBonus}.`);
         return next;
       });
       playCorrect();
     } else {
       setStreak(0);
-      setFeedback(`🍌 Not quite! The correct solution was ${question.solution}.`);
+      setFeedback(`Incorrect. The expected solution was ${question.solution}.`);
       playIncorrect();
     }
 
@@ -140,7 +150,7 @@ function Quiz() {
       setSaveSuccess(true);
     } catch (saveRequestError) {
       logEvent("SCORE_SAVE_FAILED", { message: saveRequestError.message });
-      setSaveError("Couldn't sync your high score right now. Don't worry, your play count is preserved!");
+      setSaveError("Score saved locally, but database synchronization was delayed.");
     } finally {
       setSaving(false);
     }
@@ -192,10 +202,32 @@ function Quiz() {
 
   // Results rating helper
   const getRating = () => {
-    if (score === 10) return { title: "🍌 Grand Banana Master!", subtitle: "Flawless victory! You are an absolute math genius!" };
-    if (score >= 8) return { title: "🐒 Clever Monkey!", subtitle: "Incredible puzzle solving! Top-tier score!" };
-    if (score >= 5) return { title: "🌴 Jungle Adventurer!", subtitle: "Good effort! A little more practice and you'll ace it!" };
-    return { title: "🌱 Banana Sprout!", subtitle: "Every master started somewhere. Try again and level up!" };
+    if (score === 10) {
+      return {
+        tier: "Master Tier",
+        title: "Perfect Evaluation (10/10)",
+        subtitle: "Flawless score across all visual equations. Exceptional mathematical accuracy.",
+      };
+    }
+    if (score >= 8) {
+      return {
+        tier: "Advanced Tier",
+        title: "High Proficiency",
+        subtitle: "Strong analytical capability with top-decile puzzle performance.",
+      };
+    }
+    if (score >= 5) {
+      return {
+        tier: "Intermediate Tier",
+        title: "Competent Performance",
+        subtitle: "Solid problem-solving foundation. Continue practice to advance to the Master tier.",
+      };
+    }
+    return {
+      tier: "Foundational Tier",
+      title: "Assessment Complete",
+      subtitle: "Foundational performance. Review equations and complete another session to improve.",
+    };
   };
 
   return (
@@ -205,56 +237,64 @@ function Quiz() {
       {finished ? (
         <div className="quiz-card quiz-results-card" aria-live="polite">
           <div className="results-trophy-badge">
-            <span className="trophy-emoji">🏆</span>
+            <TrophyIcon size={28} className="trophy-icon-svg" />
           </div>
+          <span className="results-tier-pill">{getRating().tier}</span>
           <h2>{getRating().title}</h2>
           <p className="results-subtitle">{getRating().subtitle}</p>
 
           <div className="results-stats-grid stats-grid-four">
             <div className="stat-box">
-              <span className="stat-label">Correct</span>
-              <span className="stat-value text-accent">{score}</span>
+              <span className="stat-label">Score</span>
+              <span className="stat-value text-accent">{score} / {TOTAL_QUESTIONS}</span>
             </div>
             <div className="stat-box">
-              <span className="stat-label">Total Puzzles</span>
+              <span className="stat-label">Total Evaluated</span>
               <span className="stat-value">{TOTAL_QUESTIONS}</span>
             </div>
             <div className="stat-box">
-              <span className="stat-label">Accuracy</span>
+              <span className="stat-label">Accuracy Rate</span>
               <span className="stat-value text-success">
                 {Math.round((score / TOTAL_QUESTIONS) * 100)}%
               </span>
             </div>
             <div className="stat-box">
               <span className="stat-label">Max Streak</span>
-              <span className="stat-value text-accent">🔥 {maxStreak}</span>
+              <span className="stat-value text-accent">{maxStreak}</span>
             </div>
           </div>
 
           <div className="save-status-banner">
             {saving && (
               <p className="saving-text">
-                <span className="spinner-inline"></span> Saving your score to leaderboard...
+                <span className="spinner-inline"></span> Synchronizing record with leaderboard...
               </p>
             )}
             {saveSuccess && (
               <p className="save-success-text">
-                ✅ Score saved to MongoDB leaderboard!
+                <CheckCircleIcon size={16} /> Record successfully synchronized to leaderboard.
               </p>
             )}
-            {saveError && <p className="alert-box alert-error">{saveError}</p>}
+            {saveError && (
+              <div className="alert-box alert-error">
+                <AlertCircleIcon size={16} />
+                <span>{saveError}</span>
+              </div>
+            )}
           </div>
 
           <div className="results-actions">
             <button type="button" className="btn-primary" onClick={handleRestart}>
-              🔄 Play Again
+              <RotateCcwIcon size={16} />
+              <span>Start New Session</span>
             </button>
             <button
               type="button"
               className="btn-secondary"
               onClick={() => navigate("/scoreboard")}
             >
-              🏆 View Leaderboard
+              <TrophyIcon size={16} />
+              <span>View Leaderboard</span>
             </button>
           </div>
         </div>
@@ -264,31 +304,34 @@ function Quiz() {
           <div className="quiz-header">
             <div className="quiz-header-left">
               <div className="quiz-badge puzzle-step-badge">
-                <span>Puzzle {questionNumber + 1} of {TOTAL_QUESTIONS}</span>
+                <span>Problem {questionNumber + 1} of {TOTAL_QUESTIONS}</span>
               </div>
               <button
                 type="button"
                 className={`btn-timer-toggle ${timerEnabled ? "active" : ""}`}
                 onClick={() => setTimerEnabled(!timerEnabled)}
-                title={timerEnabled ? "Disable Speed Run" : "Enable 20s Speed Run"}
+                title={timerEnabled ? "Switch to standard mode" : "Enable 20-second speed run mode"}
               >
-                ⏱️ Speed Run: {timerEnabled ? "ON" : "OFF"}
+                <TimerIcon size={14} />
+                <span>Speed Run: {timerEnabled ? "Active" : "Off"}</span>
               </button>
             </div>
 
             <div className="quiz-header-right">
               {streak >= 2 && (
-                <div className="quiz-streak-pill" title={`${streak} in a row!`}>
-                  <span>🔥 {streak}x Streak</span>
+                <div className="quiz-streak-pill" title={`${streak} consecutive correct answers`}>
+                  <FlameIcon size={14} />
+                  <span>{streak}x Streak</span>
                 </div>
               )}
               {timerEnabled && !submitted && !loading && (
                 <div className={`quiz-timer-pill ${timeLeft <= 5 ? "timer-urgent" : ""}`}>
-                  <span>⏱️ {timeLeft}s</span>
+                  <TimerIcon size={14} />
+                  <span>{timeLeft}s</span>
                 </div>
               )}
               <div className="quiz-badge quiz-score-badge">
-                <span className="badge-icon">⭐</span>
+                <TargetIcon size={14} />
                 <span>Score: <strong>{score}</strong></span>
               </div>
             </div>
@@ -298,7 +341,7 @@ function Quiz() {
           <div
             className="quiz-progress-track"
             role="progressbar"
-            aria-label="Quiz progress"
+            aria-label="Session progress"
             aria-valuemin={0}
             aria-valuemax={TOTAL_QUESTIONS}
             aria-valuenow={questionNumber + 1}
@@ -315,17 +358,18 @@ function Quiz() {
           {loading && (
             <div className="puzzle-loading-state" role="status">
               <div className="spinner"></div>
-              <p>Fetching puzzle from Banana API...</p>
+              <p>Loading puzzle payload from API...</p>
             </div>
           )}
 
           {/* Error State */}
           {error && (
             <div className="quiz-error-state" role="alert">
-              <div className="error-icon">⚠️</div>
+              <AlertCircleIcon size={32} className="error-icon" />
               <p>{error}</p>
               <button type="button" className="btn-primary" onClick={handleRetry}>
-                Try Again 🔄
+                <RotateCcwIcon size={16} />
+                <span>Retry Connection</span>
               </button>
             </div>
           )}
@@ -337,26 +381,28 @@ function Quiz() {
                 {!imageLoaded && (
                   <div className="image-skeleton">
                     <div className="spinner"></div>
-                    <span>Rendering puzzle...</span>
+                    <span>Rendering visual equation...</span>
                   </div>
                 )}
                 <img
                   className={`quiz-puzzle-img ${imageLoaded ? "loaded" : "hidden"}`}
                   src={question.imageUrl}
-                  alt="Banana puzzle image. Count bananas and find the missing value."
+                  alt="Mathematical puzzle equation. Calculate the symbols to find the unknown digit."
                   onLoad={() => setImageLoaded(true)}
                 />
               </div>
 
-              <p className="puzzle-instruction">
-                Count the bananas, calculate the equation, and find the missing digit <strong>(0–9)</strong>.
-              </p>
+              <div className="puzzle-instruction-bar">
+                <p className="puzzle-instruction">
+                  Calculate the visual equation and enter the missing integer solution <strong>(0–9)</strong>.
+                </p>
+              </div>
 
               {/* Input Form & Interactive Keypad */}
               <form onSubmit={handleSubmit} className="quiz-answer-form">
                 <div className="answer-input-row">
                   <label htmlFor="quiz-answer" className="visually-hidden">
-                    Your Answer
+                    Your Solution
                   </label>
                   <input
                     id="quiz-answer"
@@ -364,7 +410,7 @@ function Quiz() {
                     min="0"
                     max="9"
                     step="1"
-                    placeholder="?"
+                    placeholder="—"
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
                     disabled={submitted}
@@ -377,7 +423,7 @@ function Quiz() {
                       className="btn-submit-answer"
                       disabled={answer === ""}
                     >
-                      Check Answer ✨
+                      <span>Submit Solution</span>
                     </button>
                   ) : (
                     <button
@@ -386,14 +432,20 @@ function Quiz() {
                       onClick={handleNext}
                       autoFocus
                     >
-                      {questionNumber === TOTAL_QUESTIONS - 1 ? "Finish Quiz 🏁" : "Next Puzzle ➡️"}
+                      <span>
+                        {questionNumber === TOTAL_QUESTIONS - 1 ? "View Results" : "Next Problem"}
+                      </span>
+                      <ArrowRightIcon size={16} />
                     </button>
                   )}
                 </div>
 
                 {/* Mobile-Friendly Digit Keypad (0-9) */}
-                <div className="keypad-container" aria-label="Digit Selection Keypad">
-                  <span className="keypad-title">Tap or click a number:</span>
+                <div className="keypad-container" aria-label="Digit Input Keypad">
+                  <div className="keypad-header">
+                    <span className="keypad-title">Numeric Input</span>
+                    <span className="keypad-shortcut-hint">Keys 0–9 active</span>
+                  </div>
                   <div className="keypad-grid">
                     {DIGIT_KEYS.map((digit) => (
                       <button
@@ -418,7 +470,11 @@ function Quiz() {
                   role="status"
                   aria-live="polite"
                 >
-                  <span className="feedback-icon">{isCorrect ? "🎉" : "💡"}</span>
+                  {isCorrect ? (
+                    <CheckCircleIcon size={18} className="feedback-icon" />
+                  ) : (
+                    <AlertCircleIcon size={18} className="feedback-icon" />
+                  )}
                   <span className="feedback-text">{feedback}</span>
                 </div>
               )}
