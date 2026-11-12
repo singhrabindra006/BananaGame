@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import {
+  BananaLogoIcon,
+  UserIcon,
+  LockIcon,
+  EyeIcon,
+  EyeOffIcon,
+  CheckCircleIcon,
+  AlertCircleIcon,
+} from "../components/Icons.jsx";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -37,22 +46,24 @@ function Login() {
       <div className="auth-card">
         <div className="auth-header">
           <div className="auth-brand-badge">
-            <span className="auth-banana-emoji">🍌</span>
+            <BananaLogoIcon size={32} />
           </div>
-          <h2>Welcome Back!</h2>
-          <p className="auth-subtitle">Sign in to test your puzzle-solving skills</p>
+          <h2>Welcome Back</h2>
+          <p className="auth-subtitle">
+            Sign in to continue your mathematical logic challenges
+          </p>
         </div>
 
         {registrationSuccessMsg && (
           <div className="alert-box alert-success" role="alert">
-            <span className="alert-icon">✅</span>
+            <CheckCircleIcon size={18} className="alert-icon" />
             <span>{registrationSuccessMsg}</span>
           </div>
         )}
 
         {error && (
           <div className="alert-box alert-error" role="alert">
-            <span className="alert-icon">⚠️</span>
+            <AlertCircleIcon size={18} className="alert-icon" />
             <span>{error}</span>
           </div>
         )}
@@ -61,7 +72,9 @@ function Login() {
           <div className="form-group">
             <label htmlFor="login-username">Username</label>
             <div className="input-with-icon">
-              <span className="input-icon">👤</span>
+              <span className="input-icon">
+                <UserIcon size={16} />
+              </span>
               <input
                 id="login-username"
                 type="text"
@@ -78,7 +91,9 @@ function Login() {
           <div className="form-group">
             <label htmlFor="login-password">Password</label>
             <div className="input-with-icon">
-              <span className="input-icon">🔒</span>
+              <span className="input-icon">
+                <LockIcon size={16} />
+              </span>
               <input
                 id="login-password"
                 type={showPassword ? "text" : "password"}
@@ -96,7 +111,7 @@ function Login() {
                 tabIndex="-1"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                {showPassword ? "👁️" : "🙈"}
+                {showPassword ? <EyeOffIcon size={16} /> : <EyeIcon size={16} />}
               </button>
             </div>
           </div>
@@ -109,10 +124,10 @@ function Login() {
             {submitting ? (
               <span className="btn-content-loading">
                 <span className="button-spinner"></span>
-                <span>Signing in...</span>
+                <span>Authenticating...</span>
               </span>
             ) : (
-              <span>Sign In & Play 🚀</span>
+              <span>Sign In</span>
             )}
           </button>
         </form>

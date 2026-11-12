@@ -2,6 +2,15 @@ import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import { isSoundEnabled, setSoundEnabled, playClick } from "../utils/sound";
+import {
+  BananaLogoIcon,
+  PlayIcon,
+  TrophyIcon,
+  UserIcon,
+  LogoutIcon,
+  VolumeIcon,
+  VolumeMuteIcon,
+} from "./Icons.jsx";
 
 function Navbar() {
   const { user, logout } = useAuth();
@@ -33,8 +42,12 @@ function Navbar() {
     <header className="navbar-wrapper">
       <nav className="navbar">
         <Link to="/" className="brand-logo" onClick={closeMenu}>
-          <span className="brand-icon">🍌</span>
-          <span className="brand-text">Banana<span className="brand-accent">Quiz</span></span>
+          <div className="brand-icon-wrap">
+            <BananaLogoIcon size={24} />
+          </div>
+          <span className="brand-text">
+            Banana<span className="brand-accent">Quiz</span>
+          </span>
         </Link>
 
         <div className="nav-actions-mobile">
@@ -45,7 +58,7 @@ function Navbar() {
             aria-label={soundOn ? "Mute audio" : "Enable audio"}
             title={soundOn ? "Mute audio" : "Enable audio"}
           >
-            {soundOn ? "🔊" : "🔇"}
+            {soundOn ? <VolumeIcon size={18} /> : <VolumeMuteIcon size={18} />}
           </button>
 
           <button
@@ -70,21 +83,24 @@ function Navbar() {
                   className={`nav-link ${isActive("/quiz") ? "active" : ""}`}
                   onClick={closeMenu}
                 >
-                  <span className="nav-icon">🎮</span> Play Quiz
+                  <PlayIcon size={16} className="nav-icon" />
+                  <span>Challenge</span>
                 </Link>
                 <Link
                   to="/scoreboard"
                   className={`nav-link ${isActive("/scoreboard") ? "active" : ""}`}
                   onClick={closeMenu}
                 >
-                  <span className="nav-icon">🏆</span> Leaderboard
+                  <TrophyIcon size={16} className="nav-icon" />
+                  <span>Leaderboard</span>
                 </Link>
                 <Link
                   to="/profile"
                   className={`nav-link ${isActive("/profile") ? "active" : ""}`}
                   onClick={closeMenu}
                 >
-                  <span className="nav-icon">👤</span> Profile
+                  <UserIcon size={16} className="nav-icon" />
+                  <span>Profile</span>
                 </Link>
               </div>
 
@@ -95,9 +111,14 @@ function Navbar() {
                   onClick={handleToggleSound}
                   title={soundOn ? "Mute sound" : "Enable sound"}
                 >
-                  {soundOn ? "🔊" : "🔇"}
+                  {soundOn ? <VolumeIcon size={18} /> : <VolumeMuteIcon size={18} />}
                 </button>
-                <Link to="/profile" className="user-badge" title="View your profile" onClick={closeMenu}>
+                <Link
+                  to="/profile"
+                  className="user-badge"
+                  title="View your profile"
+                  onClick={closeMenu}
+                >
                   <span className="user-avatar">
                     {user.username.charAt(0).toUpperCase()}
                   </span>
@@ -108,7 +129,8 @@ function Navbar() {
                   onClick={handleLogout}
                   title="Sign out of your account"
                 >
-                  <span className="logout-icon">🚪</span> Logout
+                  <LogoutIcon size={16} className="logout-icon" />
+                  <span>Sign Out</span>
                 </button>
               </div>
             </>
@@ -120,7 +142,7 @@ function Navbar() {
                 onClick={handleToggleSound}
                 title={soundOn ? "Mute sound" : "Enable sound"}
               >
-                {soundOn ? "🔊" : "🔇"}
+                {soundOn ? <VolumeIcon size={18} /> : <VolumeMuteIcon size={18} />}
               </button>
               <Link
                 to="/login"

@@ -8,6 +8,7 @@ import Quiz from "./pages/Quiz.jsx";
 import Scoreboard from "./pages/Scoreboard.jsx";
 import Profile from "./pages/Profile.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
+import { BananaLogoIcon } from "./components/Icons.jsx";
 import "./App.css";
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -23,10 +24,12 @@ function App() {
     return (
       <div className="app-splash-container">
         <div className="splash-card">
-          <span className="splash-banana" role="img" aria-label="Banana">🍌</span>
+          <div className="splash-logo-wrap">
+            <BananaLogoIcon size={44} />
+          </div>
           <h2>BananaQuiz</h2>
           <div className="spinner"></div>
-          <p>Loading your adventure...</p>
+          <p>Initializing application...</p>
         </div>
       </div>
     );
@@ -84,7 +87,9 @@ function App() {
           </div>
         </main>
         <footer className="app-footer">
-          <p>🍌 BananaQuiz Game &bull; Powered by UoB Banana API &bull; {CURRENT_YEAR}</p>
+          <p>
+            BananaQuiz &bull; Mathematical Problem Solving &bull; UoB Banana API &bull; {CURRENT_YEAR}
+          </p>
         </footer>
       </div>
     </BrowserRouter>
