@@ -10,7 +10,6 @@ import {
   TrophyIcon,
   StarIcon,
   ShieldIcon,
-  CrownIcon,
 } from "../components/Icons.jsx";
 
 const getTier = (score) => {
@@ -116,11 +115,11 @@ function Profile() {
                 {userTier.label}
               </span>
               <span className="account-verified-pill">
-                <CheckCircleIcon size={12} /> Verified
+                <CheckCircleIcon size={12} /> Verified Player
               </span>
             </div>
             <p className="profile-subtitle">
-              Account Member since {joinDate} &bull; Standard Identity
+              Member since {joinDate}
             </p>
           </div>
         </div>
@@ -135,36 +134,10 @@ function Profile() {
             <span className="header-kpi-val">{profile?.gamesPlayed || 0}</span>
             <span className="header-kpi-lbl">Sessions</span>
           </div>
-        </div>
-      </div>
-
-      {/* Account Details & Virtual Identity Meta */}
-      <div className="profile-section-card">
-        <div className="section-title-wrap">
-          <UserIcon size={16} className="section-title-icon" />
-          <h3>Account Information</h3>
-        </div>
-        <p className="section-desc">Virtual identity parameters and authentication specifications</p>
-
-        <div className="profile-meta-grid">
-          <div className="profile-meta-item">
-            <span className="meta-label">Username Handle</span>
-            <span className="meta-value">@{user?.username}</span>
-          </div>
-
-          <div className="profile-meta-item">
-            <span className="meta-label">Identity Protocol</span>
-            <span className="meta-value">Stateless JWT Bearer Token</span>
-          </div>
-
-          <div className="profile-meta-item">
-            <span className="meta-label">Password Encryption</span>
-            <span className="meta-value">Bcrypt Salted Hash (10 Rounds)</span>
-          </div>
-
-          <div className="profile-meta-item">
-            <span className="meta-label">Client Session</span>
-            <span className="meta-value">Secure HTTP Cookie Storage</span>
+          <div className="header-kpi-divider" />
+          <div className="header-kpi-item">
+            <span className="header-kpi-val">{profile?.totalPoints || 0}</span>
+            <span className="header-kpi-lbl">Total Points</span>
           </div>
         </div>
       </div>
@@ -172,14 +145,14 @@ function Profile() {
       {/* Career Performance Overview */}
       <div className="profile-section-card">
         <div className="section-title-wrap">
-          <TargetIcon size={16} className="section-title-icon" />
+          <TargetIcon size={18} className="section-title-icon" />
           <h3>Performance Analytics</h3>
         </div>
-        <p className="section-desc">Aggregate metrics from verified mathematical problem-solving sessions</p>
+        <p className="section-desc">Summary of your puzzle solving statistics and rankings</p>
 
         <div className="profile-stats-grid">
           <div className="stat-box">
-            <span className="stat-label">High Score Benchmark</span>
+            <span className="stat-label">Personal Best</span>
             <span className="stat-value text-accent">{profile?.highScore || 0} / 10</span>
           </div>
           <div className="stat-box">
@@ -200,8 +173,8 @@ function Profile() {
       {/* Security & Credentials */}
       <div className="profile-section-card">
         <div className="section-title-wrap">
-          <LockIcon size={16} className="section-title-icon" />
-          <h3>Credential Security</h3>
+          <LockIcon size={18} className="section-title-icon" />
+          <h3>Security & Password</h3>
         </div>
         <p className="section-desc">Manage your password to ensure secure access to your account</p>
 
@@ -227,7 +200,7 @@ function Profile() {
               type="password"
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
-              placeholder="Enter current password"
+              placeholder="Enter your current password"
               required
             />
           </div>
@@ -235,7 +208,7 @@ function Profile() {
           <div className="form-row-two-col">
             <div className="form-group">
               <label htmlFor="new-pass">
-                New Password <span className="label-hint">(min 6 chars)</span>
+                New Password <span className="label-hint">(min 6 characters)</span>
               </label>
               <input
                 id="new-pass"
